@@ -5,56 +5,174 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Div Елементи</title>
     <style>
+        /* Стилі для сторінки */
         body {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
+            background-color: #f0f0f0;
+            margin: 50px;
         }
 
-        div {
-            width: 80px;
-            height: 80px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        /* Стилі для звичайного елемента .div */
+        .div {
+            width: 100px;
+            height: 100px;
+            border-radius: 3%;
+            margin: 5px;
             border: 2px solid #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             cursor: pointer;
+            transition: all 0.3s ease-in-out;
+        }
+
+        /* Стилі для елемента .div після кліку (clicked) */
+        .div.clicked {
+            transform: scale(1) rotate(-145deg);
+        }
+
+        /* Стилі для контейнера */
+        #container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
         }
     </style>
 </head>
 <body>
     <script>
-        // Функція для переміщення div на першу позицію або назад
-        function toggleDivPosition(div) {
-            if (div.style.order === '') {
-                // Якщо div не має порядку, то переміщуємо його на першу позицію
-                div.style.order = -1;
-            } else {
-                // Інакше повертаємо його на початкову позицію
-                div.style.order = '';
-            }
-        }
+        window.onload = function () {
+            const body = document.body;
+            const container = document.createElement("div");
+            container.id = "container";
+            body.appendChild(container);
 
-        // Функція для генерації випадкового кольору
-        function getRandomColor() {
-            const colorChars = '0123456789ABCDEF';
-            let color = '#';
-            for (let i = 0; i < 6; i++) {
-                color += colorChars[Math.floor(Math.random() * 16)];
-            }
-            return color;
-        }
+            // Об'єкт для збереження початкових позицій елементів
+            const originalPositions = {};
 
-        // Створення 100 div елементів та додавання їх до body з різними кольорами
-        for (let i = 1; i <= 100; i++) {
-            const div = document.createElement('div');
-            div.textContent = `div${i}`;
-            div.style.backgroundColor = getRandomColor(); // Встановлюємо випадковий колір
-            div.addEventListener('click', () => {
-                toggleDivPosition(div);
+            // Масив для збереження інформації про кожен елемент .div
+            const divData = [];
+
+            let isAnimating = false;
+
+            // Генерує випадковий колір в форматі HEX
+            const getRandomColor = () => {
+                const letters = "0123456789ABCDEF";
+                let color = "#";
+                for (let i = 0; i < 6; i++) {
+                    color += letters[Math.floor(Math.random() * 16)];
+                }
+                return color;
+            };
+
+            // Переміщує елемент на верхню позицію з анімацією
+            const moveToTop = (div) => {
+                div.classList.add("clicked");
+
+                div.removeEventListener("click", handleClick);
+                isAnimating = true;
+
+                setTimeout(() => {
+                    // Зберігаємо початкові позиції елемента
+                    originalPositions[div.id] = {
+                        parent: div.parentElement,
+                        nextSibling: div.nextElementSibling,
+                    };
+                    container.prepend(div);
+                    isAnimating = false;
+                    div.addEventListener("click", handleClick);
+                }, 300);
+            };
+
+            // Обробник кліку по елементу .div
+            const handleClick = (event) => {
+                if (isAnimating) {
+                    return;
+                }
+                const div = event.target;
+
+                if (originalPositions[div.id]) {
+                    div.removeEventListener("click", handleClick);
+                    isAnimating = true;
+
+                    setTimeout(() => {
+                        const closestNotClickedIndex = findClosestNotClickedPosition(div);
+                        if (closestNotClickedIndex !== -1) {
+                            const targetId = divData[closestNotClickedIndex].id;
+                            const targetDiv = document.getElementById(targetId);
+
+                            if (targetDiv) {
+                                // Відновлюємо елемент на його початкове місце
+                                originalPositions[div.id].parent.insertBefore(div, originalPositions[div.id].nextSibling);
+                                delete originalPositions[div.id];
+                                isAnimating = false;
+                                div.addEventListener("click", handleClick);
+                                div.classList.remove("clicked");
+
+                                const foundDivData = divData.find((data) => data.id === div.id);
+                                if (foundDivData) {
+                                    foundDivData.class = "";
+                                }
+
+                                const container = document.getElementById("container");
+                                container.insertBefore(div, targetDiv);
+                            }
+                        } else {
+                            const container = document.getElementById("container");
+                            container.appendChild(div);
+
+                            isAnimating = false;
+                            div.addEventListener("click", handleClick);
+                            delete originalPositions[div.id];
+                            div.classList.remove("clicked");
+
+                            const foundDivData = divData.find((data) => data.id === div.id);
+                            if (foundDivData) {
+                                foundDivData.class = "";
+                            }
+                        }
+                    }, 300);
+                } else {
+                    const r = divData.find((data) => data.id === div.id);
+                    if (r) {
+                        r.class = "clicked";
+                    }
+                    moveToTop(div);
+                }
+            };
+
+            // Знаходить найближчу позицію, де немає клікнутих елементів
+            const findClosestNotClickedPosition = (div) => {
+                const divIndex = divData.findIndex((data) => data.id === div.id);
+                if (divIndex !== -1) {
+                    for (let i = divIndex + 1; i < divData.length; i++) {
+                        if (!divData[i].class) {
+                            return i;
+                        }
+                    }
+                }
+                return -1;
+            };
+
+            // Створює 100 елементів .div з різними кольорами
+            Array.from({ length: 100 }).forEach((_, i) => {
+                const div = document.createElement("div");
+                div.classList.add("div");
+                div.textContent = `div${i + 1}`;
+                div.id = `div${i + 1}`;
+                div.addEventListener("click", handleClick);
+                div.style.backgroundColor = getRandomColor(); // Встановлюємо випадковий колір
+                container.appendChild(div);
+
+                const divInfo = {
+                    id: div.id,
+                    class: "",
+                    index: i,
+                };
+
+                divData.push(divInfo);
             });
-            document.body.appendChild(div);
-        }
+        };
     </script>
 </body>
 </html>
