@@ -24,6 +24,17 @@
 </head>
 <body>
     <script>
+        // Функція для переміщення div на першу позицію або назад
+        function toggleDivPosition(div) {
+            if (div.style.order === '') {
+                // Якщо div не має порядку, то переміщуємо його на першу позицію
+                div.style.order = -1;
+            } else {
+                // Інакше повертаємо його на початкову позицію
+                div.style.order = '';
+            }
+        }
+
         // Функція для генерації випадкового кольору
         function getRandomColor() {
             const colorChars = '0123456789ABCDEF';
@@ -43,17 +54,6 @@
                 toggleDivPosition(div);
             });
             document.body.appendChild(div);
-        }
-
-        // Функція для переміщення div на першу позицію або назад
-        function toggleDivPosition(div) {
-            if (div.style.order === '') {
-                // Якщо div не має порядку, то переміщуємо його на першу позицію
-                div.style.order = -1;
-            } else {
-                // Інакше повертаємо його на початкову позицію
-                div.style.order = '';
-            }
         }
     </script>
 </body>
