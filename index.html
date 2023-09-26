@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Div Елементи</title>
+    <style>
+        body {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        div {
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #000;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <script>
+        // Функція для генерації випадкового кольору
+        function getRandomColor() {
+            const colorChars = '0123456789ABCDEF';
+            let color = '#';
+            for (let i = 0; i < 6; i++) {
+                color += colorChars[Math.floor(Math.random() * 16)];
+            }
+            return color;
+        }
+
+        // Створення 100 div елементів та додавання їх до body з різними кольорами
+        for (let i = 1; i <= 100; i++) {
+            const div = document.createElement('div');
+            div.textContent = `div${i}`;
+            div.style.backgroundColor = getRandomColor(); // Встановлюємо випадковий колір
+            div.addEventListener('click', () => {
+                toggleDivPosition(div);
+            });
+            document.body.appendChild(div);
+        }
+
+        // Функція для переміщення div на першу позицію або назад
+        function toggleDivPosition(div) {
+            if (div.style.order === '') {
+                // Якщо div не має порядку, то переміщуємо його на першу позицію
+                div.style.order = -1;
+            } else {
+                // Інакше повертаємо його на початкову позицію
+                div.style.order = '';
+            }
+        }
+    </script>
+</body>
+</html>
